@@ -24,22 +24,20 @@ extension CovidRecord: Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         keyId = try container.decode(String.self, forKey: .keyId)
         country = try container.decode(String.self, forKey: .country)
-        let provinceStr = try container.decode(String.self, forKey: .province)
-        province = provinceStr.isEmpty ? nil : provinceStr
-        let cityStr = try container.decode(String.self, forKey: .city)
-        city = cityStr.isEmpty ? nil : cityStr
+        province = try container.decodeIfPresent(String.self, forKey: .province)
+        city = try container.decodeIfPresent(String.self, forKey: .city)
         confirmed = try container.decode(Int.self, forKey: .confirmed)
-        recovered = try container.decode(Int.self, forKey: .recovered)
+        recovered = try container.decodeIfPresent(Int.self, forKey: .recovered) ?? 0
         deaths = try container.decode(Int.self, forKey: .deaths)
         let lastUpdateStr = try container.decode(String.self, forKey: .lastUpdate)
         let formatter = DateFormatter()
         formatter.timeZone = TimeZone(identifier: "UTC")
-        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZZZ"
         guard let lastUpdateDate = formatter.date(from: lastUpdateStr) else {
             throw DecodingError.dataCorruptedError(
                 forKey: .lastUpdate,
                 in: container,
-                debugDescription: "Wrong date format."
+                debugDescription: "Wrong date format"
             )
         }
         lastUpdate = lastUpdateDate
